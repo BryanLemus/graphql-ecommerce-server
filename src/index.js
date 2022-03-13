@@ -1,10 +1,10 @@
-import express from "express";
-import { ApolloServer } from "apollo-server-express";
-import jwt from "jsonwebtoken";
-import mongoose from "mongoose";
-import * as dotenv from "dotenv";
-import { typeDefs } from "./typeDefs/index.js";
-import { resolvers } from "./resolvers/index.js";
+const express = require("express");
+const { ApolloServer } = require("apollo-server-express");
+const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
+const dotenv = require("dotenv");
+const typeDefs = require("./typeDefs/index.js");
+const resolvers = require("./resolvers/index.js");
 
 async function startApolloServer() {
   dotenv.config();

@@ -1,6 +1,6 @@
-import { gql } from "apollo-server-core";
+const { gql } = require("apollo-server-core");
 
-export const userType = gql`
+const userType = gql`
   type User {
     id: ID
     username: String
@@ -16,26 +16,24 @@ export const userType = gql`
     AUX
   }
 
+  input userInput {
+    username: String
+    email: String
+    password: String
+    displayName: String
+  }
+
   extend type Query {
     users: [User!]!
     user(id: ID!): User!
   }
 
   extend type Mutation {
-    createUser(
-      username: String
-      email: String
-      password: String
-      displayName: String
-    ): User
-    updateUser(
-      id: ID
-      username: String
-      email: String
-      password: String
-      displayName: String
-    ): User!
-    deleteUser(id: ID): User!
+    singup(user: userInput): User
     login(username: String, password: String): Token!
+    deleteUser(id: ID): User!
+    updateUser(id: ID, user: userInput): User!
   }
 `;
+
+module.exports = userType;

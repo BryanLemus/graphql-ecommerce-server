@@ -1,12 +1,13 @@
-import { queryType } from "./query.type.js";
-import { mutationType } from "./mutation.type.js";
-import { userType } from "./user.type.js";
-import { productType } from "./product.type.js";
-import { categoryType } from "./category.type.js";
-import { reviewType } from "./review.type.js";
-import { tokenType } from "./token.type.js";
+const queryType = require("./query.type.js");
+const mutationType = require("./mutation.type.js");
+const userType = require("./user.type.js");
+const productType = require("./product.type.js");
+const categoryType = require("./category.type.js");
+const reviewType = require("./review.type.js");
+const orderType = require("./order.type.js");
+const tokenType = require("./token.type.js");
 
-export const typeDefs = [
+const typeDefs = [
   queryType,
   mutationType,
   userType,
@@ -14,4 +15,7 @@ export const typeDefs = [
   categoryType,
   reviewType,
   tokenType,
+  orderType,
 ];
+
+module.exports = typeDefs;

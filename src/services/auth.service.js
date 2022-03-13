@@ -1,11 +1,11 @@
-import bcrypt from "bcryptjs";
-import dotenv from "dotenv";
-import jwt from "jsonwebtoken";
+const bcrypt = require("bcryptjs");
+const dotenv = require("dotenv");
+const jwt = require("jsonwebtoken");
 
 // retrieve env vars
 dotenv.config();
 
-export class Auth {
+class Auth {
   constructor() {}
 
   /** Bcrypt */
@@ -50,3 +50,5 @@ export class Auth {
     return null;
   }
 }
+
+module.exports = Auth;

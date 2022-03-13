@@ -1,7 +1,9 @@
-import { gql } from "apollo-server-core";
+const { gql } = require("apollo-server-core");
 
-export const tokenType = gql`
+const tokenType = gql`
   type Token {
     value: String
   }
 `;
+
+module.exports = tokenType;

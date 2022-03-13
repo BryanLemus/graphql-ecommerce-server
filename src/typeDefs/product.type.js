@@ -1,28 +1,46 @@
-import { gql } from "apollo-server-core";
+const { gql } = require("apollo-server-core");
 
-export const productType = `
+const productType = gql`
   type Product {
     id: ID
     name: String
     description: String!
+    brand: String!
     category: Category
     image: String!
     gallery: [String!]!
     price: Float
     rating: Float
     stock: Int
-    brand: String!
     availability: Availability!
     reviews: [Review!]!
   }
 
   enum Availability {
     AVAILABLE
-    DISCONTINUED
+    UNAVAILABLE
   }
 
   extend type Query {
     products: [Product!]!
     product(id: ID!): Product!
   }
+
+  input productInput {
+    name: String!
+    description: String!
+    brand: String!
+    category: ID!
+    image: String!
+    gallery: [String!]!
+    price: Float!
+  }
+
+  extend type Mutation {
+    createProduct(product: productInput): Product!
+    deleteProduct(id: ID): Product!
+    updateProduct(id: ID, product: productInput): Product!
+  }
 `;
+
+module.exports = productType;

@@ -1,6 +1,6 @@
-import { gql } from "apollo-server-core";
+const { gql } = require("apollo-server-core");
 
-export const categoryType = gql`
+const categoryType = gql`
   type Category {
     id: ID!
     name: String
@@ -11,4 +11,10 @@ export const categoryType = gql`
     categories: [Category!]!
     category(id: ID!): Category!
   }
+
+  extend type Mutation {
+    createCategory(name: String): Category!
+  }
 `;
+
+module.exports = categoryType;

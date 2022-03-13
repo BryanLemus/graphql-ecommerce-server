@@ -1,31 +1,32 @@
-import { UserInputError } from "apollo-server-core";
-import { Auth } from "../services/auth.service.js";
+const { AuthenticationError, UserInputError } = require("apollo-server-core");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { Auth } = require("../services/auth.service.js");
+const User = require("../models/user.model.js");
 
-import User from "../models/user.js";
-
-export const userResolvers = {
+const userResolvers = {
   Query: {
     users: async () => {
       try {
         return await User.find();
       } catch (error) {
-        throw new UserInputError(error);
+        throw new UserInputError(error.message);
       }
     },
     user: async (_, { id }) => {
       try {
         return await User.findById(id);
       } catch (error) {
-        throw new UserInputError(error, {
+        throw new UserInputError(error.message, {
           invalidArgs: args,
         });
       }
     },
   },
   Mutation: {
-    createUser: async (_, { username, email, password, displayName }) => {
+    singup: async (_, { username, email, password, displayName }) => {
       try {
-        if (await User.find({ username: username })) {
+        if (!(await User.find({ username: username }))) {
           const newUser = new User({
             username,
             email,
@@ -37,6 +38,29 @@ export const userResolvers = {
       } catch (error) {
         throw new UserInputError(error.message);
       }
+    },
+    login: async (_, { username, email, password }) => {
+      if (!username || !email)
+        return new Error("Email or username is required");
+
+      const userPayload = email ? { email } : { username };
+      const user = await User.findOne(userPayload);
+
+      if (!bcrypt.compare(password, user.password))
+        throw new AuthenticationError("User or password are wrong");
+
+      return {
+        value: jwt.sign(
+          {
+            userId: user.id,
+            username: user.username,
+            email: user.email,
+            roles: user.roles,
+          },
+          process.env.TOKEN_SECRET,
+          { expiresIn: "30 days" }
+        ),
+      };
     },
     updateUser: async (_, { id, username, email, password, displayName }) => {
       try {
@@ -67,3 +91,5 @@ export const userResolvers = {
     },
   },
 };
+
+module.exports = userResolvers;

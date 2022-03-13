@@ -1,5 +1,7 @@
-import { gql } from "apollo-server-core";
+const { gql } = require("apollo-server-core");
 
-export const mutationType = gql`
+const mutationType = gql`
   type Mutation
 `;
+
+module.exports = mutationType;

@@ -1,7 +1,11 @@
-import { gql } from "apollo-server-core";
+const { gql } = require("apollo-server-core");
 
-export const queryType = gql`
+const queryType = gql`
+  scalar Date
+
   type Query {
     empty: String
   }
 `;
+
+module.exports = queryType;
