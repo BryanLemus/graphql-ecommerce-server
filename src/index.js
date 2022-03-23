@@ -1,13 +1,12 @@
-const express = require("express");
-const { ApolloServer } = require("apollo-server-express");
-const jwt = require("jsonwebtoken");
-const mongoose = require("mongoose");
-const dotenv = require("dotenv");
-const typeDefs = require("./typeDefs/index.js");
-const resolvers = require("./resolvers/index.js");
+import express from "express";
+import { ApolloServer } from "apollo-server-express";
+import { config } from "dotenv";
+import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
+import { typeDefs, resolvers } from "./graphql/schema.js";
 
 async function startApolloServer() {
-  dotenv.config();
+  config();
 
   await mongoose
     .connect(process.env.MONGODB_URI)

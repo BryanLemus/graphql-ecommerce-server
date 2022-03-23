@@ -1,6 +1,6 @@
-const { Schema, model } = require("mongoose");
+import mongoose from "mongoose";
 
-const reviewSchema = new Schema(
+const reviewSchema = new mongoose.Schema(
   {
     title: {
       type: String,
@@ -12,12 +12,12 @@ const reviewSchema = new Schema(
     },
     userId: {
       ref: "User",
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       required: true,
     },
     productId: {
       ref: "Review",
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       required: true,
     },
     rating: {
@@ -31,4 +31,4 @@ const reviewSchema = new Schema(
   }
 );
 
-module.exports = model("Review", reviewSchema);
+export default mongoose.model("Review", reviewSchema);

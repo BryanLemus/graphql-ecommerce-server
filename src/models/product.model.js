@@ -1,12 +1,13 @@
-const { Schema, model } = require("mongoose");
+import mongoose from "mongoose";
 
-const productSchema = new Schema({
+const productSchema = new mongoose.Schema({
+  _id: mongoose.Schema.Types.ObjectId,
   name: String,
   description: String,
   brand: String,
   categoryId: {
     ref: "Category",
-    type: Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
   },
   image: String,
   gallery: [String],
@@ -16,4 +17,4 @@ const productSchema = new Schema({
   availability: { type: String, default: "UNAVAILABLE" },
 });
 
-module.exports = model("Product", productSchema);
+export default mongoose.model("Product", productSchema);

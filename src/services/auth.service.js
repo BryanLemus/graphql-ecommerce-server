@@ -1,6 +1,6 @@
-const bcrypt = require("bcryptjs");
-const dotenv = require("dotenv");
-const jwt = require("jsonwebtoken");
+import bcrypt from "bcryptjs";
+import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
 
 // retrieve env vars
 dotenv.config();
@@ -51,4 +51,4 @@ class Auth {
   }
 }
 
-module.exports = Auth;
+export default Auth;

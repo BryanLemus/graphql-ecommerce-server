@@ -1,8 +1,27 @@
-const { UserInputError } = require("apollo-server-core");
-const Category = require("../models/category.model.js");
-const Product = require("../models/product.model.js");
+import { UserInputError, gql } from "apollo-server-core";
+import Category from "../models/category.model.js";
+import Product from "../models/product.model.js";
 
-const categoryResolver = {
+export const typeDef = gql`
+  type Category {
+    id: ID!
+    name: String
+    products: [Product!]!
+  }
+
+  extend type Query {
+    categories: [Category!]!
+    category(id: ID!): Category!
+  }
+
+  extend type Mutation {
+    createCategory(name: String!): Category!
+    deleteCategory(id: ID!): Category!
+    updateCategory(name: String!): Category!
+  }
+`;
+
+export const resolvers = {
   Query: {
     categories: async () => {
       try {
@@ -49,5 +68,3 @@ const categoryResolver = {
     },
   },
 };
-
-module.exports = categoryResolver;

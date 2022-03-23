@@ -1,9 +1,52 @@
-const { UserInputError } = require("apollo-server-core");
-const Product = require("./../models/product.model.js");
-const Category = require("./../models/category.model.js");
-const Review = require("./../models/review.model.js");
+import { gql, UserInputError } from "apollo-server-core";
+import Product from "./../models/product.model.js";
+import Category from "./../models/category.model.js";
+import Review from "./../models/review.model.js";
 
-const productResolvers = {
+export const typeDef = gql`
+  type Product {
+    id: ID
+    name: String
+    description: String!
+    brand: String!
+    category: Category
+    image: String!
+    gallery: [String!]!
+    price: Float
+    rating: Float
+    stock: Int
+    availability: Availability!
+    reviews: [Review!]!
+  }
+
+  enum Availability {
+    AVAILABLE
+    UNAVAILABLE
+  }
+
+  extend type Query {
+    products: [Product!]!
+    product(id: ID!): Product!
+  }
+
+  input productInput {
+    name: String!
+    description: String!
+    brand: String!
+    category: ID!
+    image: String!
+    gallery: [String!]!
+    price: Float!
+  }
+
+  extend type Mutation {
+    createProduct(product: productInput): Product!
+    deleteProduct(id: ID): Product!
+    updateProduct(id: ID, product: productInput): Product!
+  }
+`;
+
+export const resolvers = {
   Query: {
     products: async () => {
       try {
@@ -65,10 +108,8 @@ const productResolvers = {
         throw new UserInputError(error);
       }
     },
-    review: async ({ id }) => {
+    reviews: async ({ id }) => {
       return await Review.find({ productId: id });
     },
   },
 };
-
-module.exports = productResolvers;

@@ -1,9 +1,36 @@
-const { UserInputError } = require("apollo-server-core");
-const Review = require("./../models/review.model.js");
-const User = require("./../models/user.model.js");
-const Product = require("./../models/product.model.js");
+import { UserInputError, gql } from "apollo-server-core";
+import Review from "../models/review.model.js";
+import User from "../models/user.model.js";
+import Product from "../models/product.model.js";
 
-const reviewResolver = {
+export const typeDef = gql`
+  type Review {
+    id: ID!
+    title: String!
+    body: String!
+    author: User!
+    product: Product!
+    rating: Float!
+    date: Date!
+  }
+
+  input reviewInput {
+    title: String
+    body: String
+    author: ID
+    product: ID
+    rating: Float
+    date: Date
+  }
+
+  extend type Mutation {
+    createReview(review: reviewInput!): Review!
+    updateReview(id: ID!, review: reviewInput!): Review!
+    deleteReview(id: ID!): Review!
+  }
+`;
+
+export const resolvers = {
   Mutation: {
     createReview: async (_, { review }) => {
       try {
@@ -40,7 +67,7 @@ const reviewResolver = {
       }
     },
   },
-  Resolver: {
+  Review: {
     author: async ({ authorId }) => {
       return await User.findById(authorId).catch((err) => {
         throw new UserInputError(err.message);
@@ -53,5 +80,3 @@ const reviewResolver = {
     },
   },
 };
-
-module.exports = reviewResolver;
