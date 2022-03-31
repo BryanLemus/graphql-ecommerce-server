@@ -9,12 +9,12 @@ async function startApolloServer() {
   config();
 
   await mongoose
-    .connect(process.env.MONGODB_URI)
-    .then(() => {
-      console.log("☁ Database connection is ready");
+    .connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
     })
     .catch((e) => {
-      console.error(`🔥 Failded connection: ${e}`, process.env.MONGODB_URI);
+      throw new Error(e);
     });
 
   const app = express();

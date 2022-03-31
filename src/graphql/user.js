@@ -1,5 +1,4 @@
-import { gql } from "apollo-server-core";
-import { AuthenticationError, UserInputError } from "apollo-server-core";
+import { gql, AuthenticationError, UserInputError } from "apollo-server-core";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Auth from "../services/auth.service.js";
@@ -7,11 +6,15 @@ import User from "../models/user.model.js";
 
 export const typeDef = gql`
   type User {
-    id: ID
-    username: String
-    email: String
-    displayName: String
-    password: String
+    id: ID!
+    firstName: String
+    lastName: String
+    userName: String!
+    displayName: String!
+    birthday: Date
+    phone: String
+    email: String!
+    password: String!
     roles: [Role!]!
   }
 
@@ -22,10 +25,15 @@ export const typeDef = gql`
   }
 
   input userInput {
-    username: String
-    email: String
-    password: String
-    displayName: String
+    firstName: String!
+    lastName: String!
+    userName: String!
+    displayName: String!
+    birthday: Date!
+    phone: String
+    email: String!
+    password: String!
+    roles: [String!]
   }
 
   extend type Query {
@@ -35,7 +43,7 @@ export const typeDef = gql`
 
   extend type Mutation {
     singup(user: userInput): User
-    login(username: String, password: String): Token!
+    login(userName: String, email: String, password: String): Token!
     deleteUser(id: ID): User!
     updateUser(id: ID, user: userInput): User!
   }
@@ -43,16 +51,30 @@ export const typeDef = gql`
 
 export const resolvers = {
   Query: {
+    /**
+     * users
+     * Return all users
+     * @returns User
+     */
     users: async () => {
       try {
-        return await find();
+        return await User.find();
       } catch (error) {
         throw new UserInputError(error.message);
       }
     },
+
+    /**
+     * user
+     * Find an user by id and return it
+     * @param {*} parent
+     * @param {id} args
+     * @param {*} context
+     * @returns User
+     */
     user: async (_, { id }) => {
       try {
-        return await findById(id);
+        return await User.findById(id);
       } catch (error) {
         throw new UserInputError(error.message, {
           invalidArgs: args,
@@ -61,27 +83,49 @@ export const resolvers = {
     },
   },
   Mutation: {
-    singup: async (_, { username, email, password, displayName }) => {
+    /**
+     * singup
+     * Create an user
+     * @param {*} parent
+     * @param {user} args
+     * @param {*} context
+     * @returns User
+     */
+    singup: async (_, { user }) => {
       try {
-        if (!(await find({ username: username }))) {
-          const newUser = new User({
-            username,
-            email,
-            password: await Auth.hashPassword(password),
-            displayName,
-          });
-          return await newUser.save();
-        }
+        if (await User.findOne({ userName: user.userName }))
+          throw new Error("User exists");
+        const newUser = new User({
+          firstName: user.firstName,
+          lastName: user.lastName,
+          userName: user.userName,
+          displayName: user.displayName,
+          bithday: user.birthday,
+          phone: user.phone,
+          email: user.email,
+          password: bcrypt.hashSync(user.password, bcrypt.genSaltSync()),
+          roles: user.roles,
+        });
+        return await newUser.save();
       } catch (error) {
         throw new UserInputError(error.message);
       }
     },
-    login: async (_, { username, email, password }) => {
-      if (!username || !email)
+
+    /**
+     * login
+     * Return auth token
+     * @param {*} parent
+     * @param {username, email, password} args
+     * @param {*} context
+     * @returns Token
+     */
+    login: async (_, { userName, email, password }) => {
+      if (!(userName || email))
         return new Error("Email or username is required");
 
-      const userPayload = email ? { email } : { username };
-      const user = await findOne(userPayload);
+      const userPayload = email ? { email } : { userName };
+      const user = await User.findOne(userPayload);
 
       if (!bcrypt.compare(password, user.password))
         throw new AuthenticationError("User or password are wrong");
@@ -99,13 +143,22 @@ export const resolvers = {
         ),
       };
     },
-    updateUser: async (_, { id, username, email, password, displayName }) => {
+
+    /**
+     * updateUser
+     * Update an existent user
+     * @param {*} parent
+     * @param {id: ID, user: UserInput} args
+     * @param {*} context
+     * @returns User
+     */
+    updateUser: async (_, { id, user }) => {
       try {
-        const user = await findById(id);
+        const user = await User.findById(id);
 
         if (!user) return;
 
-        return await findByIdAndUpdate(id, {
+        return await User.findByIdAndUpdate(id, {
           username,
           email,
           displayName,
@@ -115,13 +168,22 @@ export const resolvers = {
         throw new UserInputError(error.message);
       }
     },
+
+    /**
+     * deleteUser
+     * Delete an user.
+     * @param {*} parent
+     * @param {id: ID} args
+     * @param {*} context
+     * @returns User
+     */
     deleteUser: async (_, { id }) => {
       try {
-        const user = await findById(id);
+        const user = await User.findById(id);
 
         if (!user) return;
 
-        return await findByIdAndDelete(id);
+        return await User.findByIdAndDelete(id);
       } catch (error) {
         throw new UserInputError(error.message);
       }
