@@ -19,9 +19,9 @@ export const typeDef = gql`
   }
 
   enum Role {
-    USER
     ADMIN
-    AUX
+    EDITOR
+    CUSTOMER
   }
 
   input userInput {
