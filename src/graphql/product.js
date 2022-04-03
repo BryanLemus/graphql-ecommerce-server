@@ -17,6 +17,12 @@ export const typeDef = gql`
     stock: Int
     availability: Availability!
     reviews: [Review!]!
+    features: [Feature!]!
+  }
+
+  type Feature {
+    property: String
+    value: String
   }
 
   enum Availability {
@@ -24,9 +30,9 @@ export const typeDef = gql`
     UNAVAILABLE
   }
 
-  extend type Query {
-    products: [Product!]!
-    product(id: ID!): Product!
+  input FeatureInput {
+    property: String
+    value: String
   }
 
   input productInput {
@@ -37,6 +43,12 @@ export const typeDef = gql`
     image: String!
     gallery: [String!]!
     price: Float!
+    features: [FeatureInput!]!
+  }
+
+  extend type Query {
+    products: [Product!]!
+    product(id: ID!): Product!
   }
 
   extend type Mutation {
@@ -48,6 +60,11 @@ export const typeDef = gql`
 
 export const resolvers = {
   Query: {
+    /**
+     * products
+     * Return all products
+     * @returns [Products]
+     */
     products: async () => {
       try {
         return await Product.find();
@@ -55,6 +72,15 @@ export const resolvers = {
         throw new UserInputError(error);
       }
     },
+
+    /**
+     * product
+     * Find a product by id and return it.
+     * @param {*} parent
+     * @param { id: ID } args
+     * @param {*} context
+     * @returns Product
+     */
     product: async (_, { id }) => {
       try {
         return await Product.findById(id);
@@ -66,6 +92,12 @@ export const resolvers = {
     },
   },
   Mutation: {
+    /**
+     * createProduct
+     * Creates a product
+     * @param {*} parent
+     * @param { product: ProductInput } args
+     */
     createProduct: async (_, { product }) => {
       try {
         let newProduct = new Product({
@@ -76,6 +108,7 @@ export const resolvers = {
           image: product.image,
           gallery: product.gallery,
           price: product.price,
+          features: product.features
         });
 
         await newProduct.save().then(() => {
@@ -85,6 +118,14 @@ export const resolvers = {
         throw new UserInputError(error.message);
       }
     },
+
+    /**
+     * deleteProduct
+     * Find and delete a product.
+     * @param {*} parent
+     * @param { id: ID } args
+     * @returns Product
+     */
     deleteProduct: async (_, { id }) => {
       try {
         return await Product.findByIdAndDelete(id);
@@ -92,6 +133,14 @@ export const resolvers = {
         throw new UserInputError(error);
       }
     },
+
+    /**
+     * updateProduct
+     * Find and Update a product
+     * @param {*} parent
+     * @param { id: ID, product: ProductInput } args
+     * @returns Product
+     */
     updateProduct: async (_, { id, product }) => {
       try {
         return await Product.findByIdAndUpdate(id, product);
@@ -101,6 +150,12 @@ export const resolvers = {
     },
   },
   Product: {
+    /**
+     * category
+     * Return the product's category
+     * @param { categoryId: ID } parent
+     * @returns Category
+     */
     category: async ({ categoryId }) => {
       try {
         return await Category.findById(categoryId);
@@ -108,6 +163,13 @@ export const resolvers = {
         throw new UserInputError(error);
       }
     },
+
+    /**
+     * reviews
+     * Return all product's reviews.
+     * @param { id: ID } parent
+     * @returns [Review]
+     */
     reviews: async ({ id }) => {
       return await Review.find({ productId: id });
     },
