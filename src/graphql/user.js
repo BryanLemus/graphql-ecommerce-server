@@ -43,7 +43,7 @@ export const typeDef = gql`
 
   extend type Mutation {
     singup(user: userInput): User
-    login(userName: String, email: String, password: String): Token!
+    login(userName: String, email: String, password: String!): Token
     deleteUser(id: ID): User!
     updateUser(id: ID, user: userInput): User!
   }
@@ -116,31 +116,30 @@ export const resolvers = {
      * login
      * Return auth token
      * @param {*} parent
-     * @param {username, email, password} args
+     * @param {userName, email, password} args
      * @param {*} context
      * @returns Token
      */
     login: async (_, { userName, email, password }) => {
-      if (!(userName || email))
-        return new Error("Email or username is required");
+      // Verify args
+      if (!userName && !email) throw new Error("Required user or email");
 
+      // Find user by email or username
       const userPayload = email ? { email } : { userName };
       const user = await User.findOne(userPayload);
+      if (!user) throw new Error("Unknown user");
 
-      if (!bcrypt.compare(password, user.password))
-        throw new AuthenticationError("User or password are wrong");
+      // Verify password
+      if (!Auth.matchPasswords(password, user.password)) throw new Error("Invalid credentials");
 
+      // Return token
       return {
-        value: jwt.sign(
-          {
-            userId: user.id,
-            username: user.username,
-            email: user.email,
-            roles: user.roles,
-          },
-          process.env.TOKEN_SECRET,
-          { expiresIn: "30 days" }
-        ),
+        value: Auth.generateJwt({
+          userId: user.id,
+          userName: user.userName,
+          email: user.email,
+          roles: user.roles,
+        })
       };
     },
 
@@ -154,15 +153,15 @@ export const resolvers = {
      */
     updateUser: async (_, { id, user }) => {
       try {
-        const user = await User.findById(id);
+        const verifyUser = await User.findById(id);
 
-        if (!user) return;
+        if (!verifyUser) return;
 
         return await User.findByIdAndUpdate(id, {
-          username,
-          email,
-          displayName,
-          password: await Auth.hashPassword(password),
+          username: user.username,
+          email: user.email,
+          displayName: user.displayName,
+          password: await Auth.hashPassword(user.password),
         });
       } catch (error) {
         throw new UserInputError(error.message);

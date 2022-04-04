@@ -16,4 +16,4 @@ const productSchema = new mongoose.Schema({
   availability: { type: String, default: "UNAVAILABLE" },
 });
 
-export default mongoose.model("Product", productSchema);
+export default new mongoose.model("Product", productSchema);
